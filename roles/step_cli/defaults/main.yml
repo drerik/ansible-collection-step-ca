@@ -1,0 +1,4 @@
+---
+github_latest_release_url: "https://api.github.com/repos/smallstep/cli/releases/latest"
+deb_package_url: "https://github.com/smallstep/cli/releases/download/v{{ step_cli_version | default(latest_version) }}/step-cli_{{ step_cli_version | default(latest_version) }}_amd64.deb"
+step_ca_url: https://{{ step_ca_host }}:9000

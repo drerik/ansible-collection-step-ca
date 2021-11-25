@@ -1,0 +1,43 @@
+---
+- name: Create ssl directory
+  ansible.builtin.file:
+    path: "{{ ssl_certificate_path }}"
+    state: directory
+
+- name: Create step-ca san string
+  ansible.builtin.set_fact:
+    step_ca_san_string: "--san {{ ssl_certificate_subject_alt_names | join( ' --san ') }}"
+  when: ssl_certificate_subject_alt_names is defined
+
+- name: Create private key and CSR
+  ansible.builtin.shell: STEPDEBUG=1 step certificate create --no-password --insecure --csr {{ step_ca_san_string | default('') }} {{ ssl_certificate_common_name }} "{{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.csr" "{{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.key"
+  args:
+    creates: "{{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.key"
+  register: step_cert_create
+
+
+- name: Get auth token from ca
+  community.docker.docker_container_exec:
+    container: "{{ step_ca_containername }}"
+    command:  step ca token --provisioner-password-file=secrets/password {{ step_ca_san_string | default('') }} {{ ssl_certificate_common_name }}
+  delegate_to: "{{ step_ca_host }}"
+  register: step_ca_token
+  changed_when: false
+
+- name: Sign csr with step-cli
+  ansible.builtin.shell: STEPDEBUG=1 step ca sign --token {{ step_ca_token.stdout }} --not-after={{ ssl_certificate_not_after | default('24h') }} "{{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.csr" "{{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.crt"
+  args:
+    creates: "{{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.crt"
+
+- name: Create step certificate renew script
+  ansible.builtin.copy:
+    dest: "{{ ssl_certificate_path }}/step_renew_certificates_post_tasks.sh"
+    mode: '0755'
+    content: "{{ step_renew_cert_post_script }}"
+
+- name: Add step certificate renew to cron
+  ansible.builtin.cron:
+    name: "certificate renewal for {{ ssl_certificate_common_name }}"
+    special_time: daily
+    job: "{{ step_renew_cert_cmd }}"
+

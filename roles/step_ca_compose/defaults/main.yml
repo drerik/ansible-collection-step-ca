@@ -1,0 +1,27 @@
+---
+step_ca_project_name: step_ca
+step_ca_home_dir: /srv/{{ step_ca_project_name }}
+step_ca_containername: step-ca
+step_ca_init_name: my_ca_name
+step_ca_init_dns_names: localhost,{{ inventory_hostname }}
+step_ca_config:
+  authority:
+    claims:
+      maxTLSCertDuration: 2160h
+
+step_ca_compose_conf:
+  version: '3'
+  services:
+    step-ca:
+      container_name: "{{ step_ca_containername }}"
+      image: smallstep/step-ca
+      restart: unless-stopped
+      environment:
+        DOCKER_STEPCA_INIT_NAME: "{{ step_ca_init_name }}"
+        DOCKER_STEPCA_INIT_DNS_NAMES: "{{ step_ca_init_dns_names }}"
+      ports:
+        - 9000:9000
+      volumes:
+        - step:/home/step
+  volumes:
+    step: {}

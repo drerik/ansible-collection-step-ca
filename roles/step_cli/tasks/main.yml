@@ -1,0 +1,44 @@
+---
+- name: Set latest version
+  block:
+    - name: get github latest page
+      ansible.builtin.uri:
+        url: "{{ github_latest_release_url }}"
+      register: deb_latest_url_result
+
+    - name: define latest_version fact
+      ansible.builtin.set_fact:
+        latest_version: "{{ deb_latest_url_result.json.tag_name | replace('v','',1) }}"
+  when: step_cli_version is not defined
+
+- name: Install step-cli deb package
+  ansible.builtin.apt:
+    deb: "{{ deb_package_url }}"
+
+- name: get stat on config file
+  ansible.builtin.stat:
+    path: /root/.step/config/defaults.json
+  register: stat_config_file
+
+- name: create config
+  block:
+    - name: Get step-ca fingerprint
+      community.docker.docker_container_exec:
+        container: "{{ step_ca_containername }}"
+        command: "step certificate fingerprint /home/step/certs/root_ca.crt"
+        chdir: /tmp
+      register: step_ca_fingerprint_output
+      delegate_to: "{{ step_ca_host }}"
+
+    - name: Create step-ca-fingerprint fact
+      ansible.builtin.set_fact:
+        step_ca_fingerprint: "{{ step_ca_fingerprint_output.stdout }}"
+
+    - name: Create step ca configuration
+      ansible.builtin.shell: step ca bootstrap --ca-url {{ step_ca_url }} --fingerprint {{ step_ca_fingerprint }}
+      args:
+        creates: /root/.step/config/defaults.json
+
+    - name: Install root root certificate
+      ansible.builtin.shell: step certificate install /root/.step/certs/root_ca.crt
+  when: stat_config_file.stat.exists is false

@@ -1,0 +1,46 @@
+---
+- name: Create home dir
+  ansible.builtin.file:
+    name: "{{ step_ca_home_dir }}"
+    state: directory
+
+- name: Create docker-compose file
+  ansible.builtin.copy:
+    dest: "{{ step_ca_home_dir }}/docker-compose.yml"
+    content: "{{ step_ca_compose_conf | to_nice_yaml( width=2000, explicit_start=True, explicit_end=True) }}"
+
+- name: Make shure the rest of the container set are up.
+  community.docker.docker_compose:
+    build: yes
+    pull: yes
+    project_src: "{{ step_ca_home_dir }}"
+
+- name: get step volume info
+  community.docker.docker_volume_info:
+    name: "{{ step_ca_project_name }}_step"
+  register: step_ca_step_volume
+
+- name: Slupr config from docker_volume
+  ansible.builtin.slurp:
+    src: "{{ step_ca_step_volume.volume.Mountpoint }}/config/ca.json"
+  register: ca_config_file
+  until: ca_config_file.content is defined
+  retries: 10
+  delay: 5
+
+
+- name: Get CA config from ca.json file
+  set_fact:
+    ca_config: "{{ ca_config_file['content'] | b64decode | from_json }}"
+
+- name: Merge step_ca_config into existing ca.json
+  ansible.builtin.copy:
+    dest: "{{ step_ca_step_volume.volume.Mountpoint }}/config/ca.json"
+    content: "{{ ca_config | combine(step_ca_config, recursive=True ) | to_nice_json( ensure_ascii=False) }}"
+  register: update_ca_json
+
+- name: Restart step-ca container
+  community.docker.docker_compose:
+    project_src: "{{ step_ca_home_dir }}"
+    restarted: yes
+  when: update_ca_json.changed | bool

@@ -1,0 +1,26 @@
+- name: Remove step-ca after test.yml run
+  hosts: step_ca
+  vars:
+    step_ca_containername: step-ca-{{ inventory_hostname }}
+    step_ca_host: "{{ inventory_hostname }}"
+    step_ca_init_name: testca
+    step_ca_home_dir: /srv/step_ca
+  tasks:
+    - name: Remove certificates
+      ansible.builtin.file:
+        path: /etc/ssl/{{ inventory_hostname }}
+        state: absent
+    - name: remote step user dir
+      ansible.builtin.file:
+        path: /root/.step/
+        state: absent
+    - name: Remove container set
+      community.docker.docker_compose:
+          project_src: "{{ step_ca_home_dir }}"
+          state: absent
+          remove_volumes: yes
+    - name: remote step user dir
+      ansible.builtin.file:
+        path: "{{ step_ca_home_dir }}"
+        state: absent
+

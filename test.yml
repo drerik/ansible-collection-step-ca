@@ -1,0 +1,26 @@
+- name: Deploy the step_ca_compose role to step_ca group
+  hosts: step_ca
+  vars:
+    step_ca_containername: step-ca-{{ inventory_hostname }}
+    step_ca_host: "{{ inventory_hostname }}"
+    step_ca_init_name: testca
+  roles:
+    - drerik.container.docker
+    - drerik.step_ca.step_ca_compose
+
+- name: Install step-cli and create certificates
+  hosts: step_ca
+  vars:
+    step_ca_containername: step-ca-{{ inventory_hostname }}
+    step_ca_host: "{{ inventory_hostname }}"
+    ssl_certificate_path: /etc/ssl/{{ inventory_hostname }}
+    ssl_certificate_common_name: "{{ inventory_hostname }}"
+    ssl_certificate_key_size: 4096
+    ssl_certificate_subject_alt_names:
+          - "{{ inventory_hostname }}"
+          - 127.0.0.1
+          - "{{ ansible_default_ipv4.address }}"
+    ssl_certificate_not_after: 2160h
+  roles:
+    - drerik.step_ca.step_cli
+    - drerik.step_ca.certificate

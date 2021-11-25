@@ -1,0 +1,12 @@
+---
+ssl_certificate_path: /etc/ssl/{{ inventory_hostname }}
+ssl_certificate_common_name: "{{ inventory_hostname }}"
+ssl_certificate_key_size: 4096
+ssl_certificate_not_after: 2160h
+step_renew_cert_expires_in: 72h
+step_renew_cert_cmd: step ca renew -f --expires-in {{ step_renew_cert_expires_in }} --exec {{ ssl_certificate_path }}/step_renew_certificates_post_tasks.sh {{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.crt {{ ssl_certificate_path }}/{{ ssl_certificate_common_name }}.key
+step_renew_cert_log: /var/log/step_renew_cert_{{ ssl_certificate_common_name }}.log
+step_renew_cert_post_script: |
+  #!/bin/bash
+  # Script to run after certificates has been renewed
+  echo "$(date +%F-%T) Certificate for {{ ssl_certificate_common_name }} is renewed" >> {{ step_renew_cert_log }}
