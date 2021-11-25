@@ -1,6 +1,6 @@
 # Ansible Collection - drerik.step_ca
 
-Simple sertificate management with step-ca
+Simple certificate management with step-ca
 
 Product documentation: <https://smallstep.com/docs/step-ca>
 
