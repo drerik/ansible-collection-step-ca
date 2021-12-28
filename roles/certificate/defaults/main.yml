@@ -1,5 +1,6 @@
 ---
 ssl_certificate_path: /etc/ssl/{{ inventory_hostname }}
+step_ca_containername: step-ca
 ssl_certificate_common_name: "{{ inventory_hostname }}"
 ssl_certificate_key_size: 4096
 ssl_certificate_not_after: 2160h
