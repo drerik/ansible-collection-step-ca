@@ -11,8 +11,8 @@ It uses the `community.docker.docker_container_exec` module to get a onetime tok
 Role Variables
 --------------
 
-- `step_ca_containername`: Name of the container the step-ca service is deployed in. This variable is also used for other roles in the `drerik.step-ca` collection.
 - `step_ca_host`: step-ca host to sign certificates with.
+- `step_ca_containername`: ( Default: step-ca ) Name of the container the step-ca service is deployed in. This variable is also used for other roles in the `drerik.step-ca` collection.
 - `ssl_certificate_path`: ( Default: `/etc/ssl/{{ inventory_hostname}}` ) Where to store the certificates.
 - `ssl_certificate_common_name`: ( Default: `{{ inventory_hostname }}` ) The common name in the certificate.
 - `ssl_certificate_key_size`: ( Default: `4096` ) Certificate keysize.
@@ -53,6 +53,13 @@ Example Playbook
           - 127.0.0.1
           - "{{ ansible_default_ipv4.address }}"
     ssl_certificate_not_after: 2160h
+  roles:
+    - drerik.step_ca.certificate
+
+- name: Create and sign sertificates on the server win minimal configuration
+  hosts: server
+  vars:
+    step_ca_host: "{{ inventory_hostname }}"
   roles:
     - drerik.step_ca.certificate
 ```
