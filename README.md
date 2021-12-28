@@ -17,3 +17,9 @@ Installs step client. See role for documentation.
 ### drerik.step_ca.certificate
 
 Uses the step-cli application to deploy and manage certificates.
+
+
+
+## TODO
+
+https://smallstep.com/blog/build-a-tiny-ca-with-raspberry-pi-yubikey/

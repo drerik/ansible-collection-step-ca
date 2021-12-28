@@ -11,7 +11,7 @@ Uses the `community.docker.docker_container_exec` module to get cert
 Role Variables
 --------------
 
-- `step_ca_containername`: Name of the container the step-ca service is deployed in. This variable is also used for other roles in the `drerik.step_ca` collection.
+- `step_ca_containername`: ( Default: step-ca ) Name of the container the step-ca service is deployed in. This variable is also used for other roles in the `drerik.step_ca` collection.
 - `step_ca_host`: step-ca host to fetch fingerprint from under configuration. 
 - `step_ca_url`: ( Default: `https://{{ step_ca_host }}:9000` ) Defines the url the tool uses to access the CA. 
 
