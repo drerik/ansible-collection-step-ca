@@ -1,7 +1,7 @@
 drerik.step-ca.step-cli
 =========
 
-Installs and configures step-cli ( <https://smallstep.com/docs/step-cli> )package to work against a container based step-ca server deployed with the `drerik.step-ca.step-ca_compose` role. Works on debian based distros
+Installs and configures step-cli ( <https://smallstep.com/docs/step-cli> )package to work against a container based step-ca server deployed with the `drerik.step_ca.step_ca_compose` role. Works on debian based distros
 
 Requirements
 ------------

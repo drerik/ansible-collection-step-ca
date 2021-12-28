@@ -56,7 +56,15 @@ Example Playbook
   hosts: step-ca
   roles:
     - drerik.container.docker
-    - drerik.step_ca.step-ca_compose
+    - drerik.step_ca.step_ca_compose
+
+- name: Deploy the step_ca_compose role to step_ca group with basic configuration
+  hosts: step-ca
+  vars:
+    step_ca_init_name: my_private_ca
+  roles:
+    - drerik.container.docker
+    - drerik.step_ca.step_ca_compose
 ```
 
 License

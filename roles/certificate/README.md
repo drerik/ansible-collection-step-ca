@@ -1,7 +1,7 @@
 drerik.step-ca.certificates
 =========
 
-A ansible role that creates SSL certificates signed with a step-ca Certificate Authority deployed with the role `drerik.step-ca.step-ca_compose` using the `step` commandline utility.
+A ansible role that creates SSL certificates signed with a step-ca Certificate Authority deployed with the role `drerik.step_ca.step_ca_compose` using the `step` commandline utility.
 
 Requirements
 ------------
